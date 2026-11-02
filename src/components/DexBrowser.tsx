@@ -19,6 +19,7 @@ export function DexBrowser() {
   const [pool, setPool] = useState<Pool | "all">("all");
   const [rarity, setRarity] = useState<Rarity | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
+  const [ownedOnly, setOwnedOnly] = useState(false);
   const owned = useMemo(() => new Set(vault?.owned ?? []), [vault]);
 
   const years = useMemo(() => {
@@ -30,16 +31,30 @@ export function DexBrowser() {
   }, [data]);
 
   const visible = useMemo(() => {
-    return (data?.cards ?? []).filter((card) => {
+    const matched = (data?.cards ?? []).filter((card) => {
       if (pool !== "all" && card.pool !== pool) return false;
       if (rarity !== "all" && card.rarity !== rarity) return false;
       if (year !== "all" && card.year !== year) return false;
+      if (ownedOnly && !owned.has(card.card_id)) return false;
       return true;
     });
-  }, [data, pool, rarity, year]);
+    return [...matched].sort((a, b) => {
+      const ownedDelta = Number(owned.has(b.card_id)) - Number(owned.has(a.card_id));
+      return ownedDelta;
+    });
+  }, [data, pool, rarity, year, ownedOnly, owned]);
 
-  const have = visible.filter((card) => owned.has(card.card_id)).length;
-  const badges = useMemo(() => badgeSets(data?.cards ?? [], owned), [data, owned]);
+  const have = (data?.cards ?? []).filter((card) => {
+    if (!owned.has(card.card_id)) return false;
+    if (pool !== "all" && card.pool !== pool) return false;
+    if (rarity !== "all" && card.rarity !== rarity) return false;
+    if (year !== "all" && card.year !== year) return false;
+    return true;
+  }).length;
+  const badges = useMemo(
+    () => badgeSets(data?.cards ?? [], owned, pool, rarity, year),
+    [data, owned, pool, rarity, year],
+  );
 
   if (error) {
     return <StatusBlock title="Dex didn't open" body="The catalog file missed this page." action={<Button onClick={reload}>Try again</Button>} />;
@@ -56,13 +71,14 @@ export function DexBrowser() {
         {data ? `${owned.size} of ${data.card_count} owned · showing ${have} of ${visible.length}` : "Counting the shelves…"}
       </p>
 
-      <div className="mt-6 flex gap-2 overflow-x-auto pb-2">
+      <div className="mt-6 flex flex-wrap gap-2">
         <FilterChip on={pool === "all"} onClick={() => setPool("all")}>All pools</FilterChip>
         {SLOT_ORDER.map((item) => (
           <FilterChip key={item} on={pool === item} onClick={() => setPool(item)}>{POOLS[item].label}</FilterChip>
         ))}
+        <FilterChip on={ownedOnly} onClick={() => setOwnedOnly((value) => !value)}>Owned</FilterChip>
       </div>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-2">
+      <div className="mt-2 flex flex-wrap gap-2">
         <FilterChip on={rarity === "all"} onClick={() => setRarity("all")}>All rarities</FilterChip>
         {RARITIES.map((item) => (
           <FilterChip key={item} on={rarity === item} onClick={() => setRarity(item)}>{item} {RARITY_WORD[item]}</FilterChip>
@@ -79,11 +95,11 @@ export function DexBrowser() {
       </label>
 
       {badges.length > 0 ? (
-        <ul className="mt-6 flex gap-2 overflow-x-auto pb-2">
+        <ul className="mt-6 flex flex-wrap gap-2">
           {badges.map((badge) => (
-            <li key={badge.key} className={cn("min-w-[140px] rounded-2xl border px-3 py-3", badge.done ? "border-phosphor bg-phosphor text-[#14160f]" : "border-white/10 text-mute")}>
+            <li key={badge.key} className={cn("whitespace-nowrap rounded-2xl border px-3 py-3", badge.done ? "border-phosphor bg-phosphor text-[#14160f]" : "border-white/10 text-mute")}>
               <p className="font-mono text-[10px] uppercase tracking-[0.14em]">{badge.done ? "Badge" : `${badge.have}/${badge.total}`}</p>
-              <p className="mt-1 font-serif text-lg leading-tight">{badge.label}</p>
+              <p className="mt-1 font-serif text-lg leading-none">{badge.label}</p>
             </li>
           ))}
         </ul>
@@ -125,9 +141,18 @@ function FilterChip({ on, onClick, children }: { on: boolean; onClick: () => voi
   );
 }
 
-function badgeSets(cards: Card[], owned: Set<string>) {
+function badgeSets(
+  cards: Card[],
+  owned: Set<string>,
+  pool: Pool | "all",
+  rarity: Rarity | "all",
+  year: number | "all",
+) {
   const groups = new Map<string, Card[]>();
   for (const card of cards) {
+    if (pool !== "all" && card.pool !== pool) continue;
+    if (rarity !== "all" && card.rarity !== rarity) continue;
+    if (year !== "all" && card.year !== year) continue;
     const key = `${card.year}|${card.pool}|${card.rarity}`;
     const list = groups.get(key) ?? [];
     list.push(card);

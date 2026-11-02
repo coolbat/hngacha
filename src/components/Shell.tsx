@@ -30,7 +30,8 @@ function NavLinks({ variant }: { variant: "row" | "bar" }) {
   const pathname = normalize(usePathname() || "/");
   return (
     <nav
-      className={variant === "row" ? "hidden items-center gap-6 md:flex" : "fixed inset-x-0 bottom-0 z-20 flex border-t border-white/10 bg-[#08090d]/95 px-2 py-2 backdrop-blur md:hidden"}
+      className={variant === "row" ? "hidden items-center gap-6 md:flex" : "fixed inset-x-0 bottom-0 z-20 flex border-t border-white/10 bg-[#08090d]/95 px-2 pt-2 backdrop-blur md:hidden"}
+      style={variant === "bar" ? { paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom, 0px))" } : undefined}
       aria-label={variant === "row" ? "Primary" : "Mobile"}
     >
       {NAV.map((item) => {
@@ -68,10 +69,10 @@ export function Shell({ children }: { children: ReactNode }) {
           <NavLinks variant="row" />
         </div>
       </header>
-      <main id="content" className="mx-auto w-full max-w-page px-4 pb-28 pt-8 md:px-6 md:pb-16 md:pt-12">
+      <main id="content" className="mobile-clear mx-auto w-full max-w-page px-4 pt-8 md:px-6 md:pb-16 md:pt-12">
         {children}
       </main>
-      <footer className="border-t border-white/10 pb-24 md:pb-0">
+      <footer className="mobile-clear border-t border-white/10 md:pb-0">
         <div className="mx-auto flex max-w-page flex-col gap-3 px-4 py-8 text-sm text-mute md:px-6">
           <p>{ATTRIBUTION}</p>
           <p className="font-mono text-xs tracking-wide">Excerpts are capped at 300 characters and link back to the original thread.</p>

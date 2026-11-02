@@ -85,7 +85,7 @@ export function HomeBoard() {
             </p>
           </div>
         </div>
-        <div className="hidden lg:block">
+        <div className="mx-auto w-[min(100%,200px)] lg:mx-0 lg:w-[280px]">
           {chase ? (
             <Link href={`/card/${chase.card_id}`} className="card-link">
               <CardView card={chase} />
@@ -128,19 +128,22 @@ export function HomeBoard() {
         {error ? (
           <StatusBlock title="Catalog missed the table" body="The card file didn't load. The draw can wait." action={<Button onClick={reload}>Try again</Button>} />
         ) : (
-          <div className="flex gap-3 overflow-x-auto pb-3 xl:grid xl:grid-cols-5 xl:overflow-visible">
-            {pack
-              ? pack.map((card) => (
-                  <Link key={card.card_id} href={`/card/${card.card_id}`} className="card-link w-[150px] shrink-0 snap-start xl:w-auto">
-                    <CardView card={card} />
-                  </Link>
-                ))
-              : Array.from({ length: 5 }, (_, index) => (
-                  <div key={index} className="w-[150px] shrink-0 xl:w-auto">
-                    <CardSkeleton />
-                  </div>
-                ))}
-          </div>
+          <>
+            <div className="pack-row" aria-label="Today's five cards. Swipe sideways.">
+              {pack
+                ? pack.map((card, index) => (
+                    <Link key={card.card_id} href={`/card/${card.card_id}`} className="card-link" aria-label={`Card ${index + 1} of 5, ${card.title}`}>
+                      <CardView card={card} />
+                    </Link>
+                  ))
+                : Array.from({ length: 5 }, (_, index) => (
+                    <div key={index}>
+                      <CardSkeleton />
+                    </div>
+                  ))}
+            </div>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-mute md:hidden">Swipe · five cards</p>
+          </>
         )}
         {loading && !data ? <p className="mt-3 font-mono text-xs text-mute">Shuffling the archive…</p> : null}
         <p className="mt-4">

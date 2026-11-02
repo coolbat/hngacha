@@ -1522,6 +1522,34 @@ def validate(cards: list[dict], strict: bool = True) -> None:
         log("legendary cmt_9224 present as UR")
 
 
+def prune_dead_thumbs(cards: list[dict]) -> None:
+    """Drop YouTube thumbs that 404 so the card falls back to the typographic face."""
+    import urllib.request
+
+    targets = [c for c in cards if c.get("image_url") and "i.ytimg.com" in c["image_url"]]
+    if not targets:
+        return
+
+    def alive(url: str) -> bool:
+        request = urllib.request.Request(url, method="GET")
+        try:
+            with urllib.request.urlopen(request, timeout=12) as response:
+                response.read(32)
+                return response.status == 200
+        except Exception:
+            return False
+
+    dead = 0
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        futures = {pool.submit(alive, c["image_url"]): c for c in targets}
+        for future in as_completed(futures):
+            card = futures[future]
+            if not future.result():
+                card["image_url"] = None
+                dead += 1
+    log(f"cleared {dead} missing video thumbs of {len(targets)}")
+
+
 def write_catalog(cards: list[dict], months: list[str], started: float) -> None:
     newest = max((c["last_seen"] for c in cards if c["last_seen"]), default="")
     pools = defaultdict(int)
@@ -1591,6 +1619,7 @@ def main() -> None:
         f"oss={len(acc.oss)} polls={len(acc.polls)} days={len(acc.days)} cursed={len(acc.cursed)}"
     )
     cards = build_cards(acc)
+    prune_dead_thumbs(cards)
     sample_print(cards)
     validate(cards, strict=len(acc.months) >= 36)
     import os

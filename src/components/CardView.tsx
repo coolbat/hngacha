@@ -88,6 +88,10 @@ export function CardView({ card, mode = "full" }: { card: Card; mode?: "full" | 
                 alt=""
                 className={card.pool === "book" ? "is-contain" : undefined}
                 onError={() => setImageFailed(true)}
+                onLoad={(event) => {
+                  const image = event.currentTarget;
+                  if (image.naturalWidth > 0 && image.naturalWidth < 130) setImageFailed(true);
+                }}
               />
             ) : card.pool === "comment" ? (
               <span className="watermark" aria-hidden>“</span>

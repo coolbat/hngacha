@@ -30,8 +30,20 @@ export default function AboutPage() {
         <p className="mt-4 max-w-3xl text-mute">
           Each slot rolls its own rarity inside its pool. A pack that would be five commons redraws the wild card until it is Rare or better. While your dex is incomplete, a card drawn in the last 30 days stays out of the personal shuffle.
         </p>
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full min-w-[560px] border-collapse text-left text-sm">
+        <ul className="mt-6 grid gap-3 md:hidden">
+          {RATES.map((row) => (
+            <li key={row.rarity} className="rounded-2xl border border-white/10 px-4 py-4">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="font-serif text-3xl">{row.rarity}</p>
+                <p className="font-mono text-phosphor">{row.rate}</p>
+              </div>
+              <p className="mt-2 text-sm">{row.band}</p>
+              <p className="mt-1 text-sm text-mute">Frame · {row.look}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-6 hidden md:block">
+          <table className="w-full border-collapse text-left text-sm">
             <thead className="font-mono text-[11px] uppercase tracking-wider text-mute">
               <tr>
                 <th className="border-b border-white/10 py-3 pr-4 font-medium">Rarity</th>
