@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+tsconfig.tsbuildinfo
+__pycache__
+*.pyc
+.DS_Store
+*.log
+.venv
