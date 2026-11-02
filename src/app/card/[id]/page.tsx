@@ -33,10 +33,10 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
   return (
     <Shell>
       <article className="grid items-start gap-8 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-12">
-        <div className="mx-auto w-full max-w-[320px]">
+        <div className="order-2 mx-auto w-full max-w-[320px] lg:order-1">
           <CardView card={card} />
         </div>
-        <div>
+        <div className="order-1 lg:order-2">
           <p className="kicker">
             <Link href="/dex" className="hover:underline">{pool.label}</Link>
             {card.sub_pool ? ` · ${SUBPOOLS[card.sub_pool].label}` : ""} · {card.rarity} {RARITY_WORD[card.rarity]}

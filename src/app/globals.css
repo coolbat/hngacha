@@ -343,23 +343,43 @@ body {
 .card-stats {
   margin-top: auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1cqi;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
   border-top: 1px solid rgba(28, 25, 21, 0.12);
   padding-top: 2cqi;
 }
-.card-stats span { display: block; }
+.card-stats > span { display: block; min-width: 0; }
 .stat-k {
+  display: block;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: clamp(8px, 4.4cqi, 10px);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #6d665c;
 }
 .stat-v {
+  display: block;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: clamp(11px, 6.4cqi, 14px);
   font-weight: 500;
+}
+/* Five-up row at tablet width is too narrow for three columns of labels. */
+@container (max-width: 220px) {
+  .card-stats {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .card-stats > span {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .card-stats .stat-k,
+  .card-stats .stat-v {
+    display: inline;
+    letter-spacing: 0.04em;
+  }
 }
 
 .card.is-shadow .card-paper { background: #12151c; color: transparent; }
@@ -516,6 +536,10 @@ body {
   }
   .mobile-clear {
     padding-bottom: var(--mobile-bar);
+  }
+  .card-actions {
+    scroll-margin-bottom: var(--mobile-bar);
+    margin-bottom: 0.5rem;
   }
 }
 

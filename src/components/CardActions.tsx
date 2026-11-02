@@ -14,7 +14,7 @@ export function CardActions({ card }: { card: Card }) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   return (
-    <div className="mt-6 flex flex-wrap gap-2">
+    <div className="card-actions mt-6 flex flex-wrap gap-2">
       <Button
         variant={saved ? "primary" : "quiet"}
         status={saved ? "success" : "idle"}
